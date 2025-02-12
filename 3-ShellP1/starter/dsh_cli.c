@@ -46,7 +46,7 @@ void printDrag();
  */
 
 int main(){
-    char cmd_buff[SH_CMD_MAX];
+    char *cmd_buff= malloc(SH_CMD_MAX * sizeof(char));
     int rc = 0;
     command_list_t clist;
     while(1){
@@ -88,6 +88,7 @@ int main(){
         	}
     	}
 	}
+	free(cmd_buff);
     return 0;
 }
 
