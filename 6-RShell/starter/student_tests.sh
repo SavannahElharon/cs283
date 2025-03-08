@@ -97,7 +97,12 @@ EOF
     run ./dsh -i 127.0.0.1
     [ "$status" -ne 0 ]
 }
-
+@test "Execute command with no output" {
+    startServer 12366
+    result=$(echo "/bin/true" | ./dsh -c -p 12366)
+    stopServer 12366
+    [[ "$result" == *"Command executed with exit code: 0"* ]]
+}
 @test "Port option without mode" {
     run ./dsh -p 12345
     [ "$status" -ne 0 ]
@@ -128,3 +133,34 @@ EOF
     stopServer 12356
     [ "$result" -eq 0 ]
 }
+
+@test "Background process" {
+    run ./dsh <<EOF
+/bin/sleep 2 &
+exit
+EOF
+    [ "$status" -eq 0 ]
+}
+
+@test "Redirection input" {
+    echo "Hello World" > testfile.txt
+    run ./dsh <<EOF
+/bin/cat < testfile.txt
+exit
+EOF
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Hello World"* ]]
+    rm testfile.txt
+}
+
+@test "Redirection output" {
+    run ./dsh <<EOF
+/bin/echo "Hello Output" > output.txt
+exit
+EOF
+    [ "$status" -eq 0 ]
+    grep -q "Hello Output" output.txt
+    [ $? -eq 0 ]
+    rm output.txt
+}
+
